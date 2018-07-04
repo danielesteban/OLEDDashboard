@@ -97,7 +97,6 @@ class Server {
       clearTimeout(this.watchTimer);
       this.watchTimer = setTimeout(() => {
         fs.readFile(update, (err, firmware) => {
-          fs.unlink(update, () => {});
           if (err) return;
           this.ws.clients.forEach(client => Server.UpdateFirmware(client, firmware));
         });
