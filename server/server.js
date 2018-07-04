@@ -17,15 +17,15 @@ class Server {
     this.cache = [];
     this.ws = new ws.Server({ port: PORT });
     this.ws.on('connection', this.onClient.bind(this));
-    if (DEVELOPMENT) {
-      this.watchDevFirmware();
-    }
-    fs.readdir(firmwaresPath, (err, files) => {
-      const firmwares = files
-        .filter(file => ~(file.indexOf('.bin')))
-        .map(file => file.substr(0, file.indexOf('.bin')));
-      firmwares.sort(compareVersions);
-      this.firmware = firmwares[0];
+    this.getNewestFirmware((err, firmware) => {
+      if (!err && firmware) {
+        this.firmware = firmware;
+      }
+      if (DEVELOPMENT) {
+        this.watchDevFirmware();
+      } else {
+        this.watchFirmware();
+      }
     });
   }
   onClient(client) {
@@ -76,6 +76,16 @@ class Server {
       }
     });
   }
+  getNewestFirmware(callback) {
+    fs.readdir(firmwaresPath, (err, files) => {
+      if (err) return callback(true);
+      const firmwares = files
+        .filter(file => ~(file.indexOf('.bin')))
+        .map(file => file.substr(0, file.indexOf('.bin')));
+      firmwares.sort(compareVersions);
+      return callback(false, firmwares[0]);
+    });
+  }
   watchDevFirmware() {
     // Automatically push updates when they're compiled
     const update = path.resolve(__dirname, '../.pioenvs/esp01/firmware.bin');
@@ -90,6 +100,29 @@ class Server {
             this.ws.clients.forEach(client => Server.UpdateFirmware(client, firmware));
           });
         }, 500);
+      }
+    });
+  }
+  watchFirmware() {
+    // Automatically push the latest available firmware
+    fs.watch(firmwaresPath, (e, file) => {
+      if (e === 'rename' && ~(file.indexOf('.bin'))) {
+        const version = file.substr(0, file.indexOf('.bin'));
+        if (!this.firmware || compareVersions(version, this.firmware) >= 0) {
+          setTimeout(() => {
+            this.getNewestFirmware((err, firmware) => {
+              if (err || !firmware) {
+                delete this.firmware;
+                return;
+              }
+              this.firmware = firmware;
+              fs.readFile(path.join(firmwaresPath, `${this.firmware}.bin`), (err, firmware) => {
+                if (err) return;
+                this.ws.clients.forEach(client => Server.UpdateFirmware(client, firmware));
+              });
+            });
+          }, 500);
+        }
       }
     });
   }
