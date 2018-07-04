@@ -44,7 +44,6 @@ class Server {
           {
             const version = data.toString();
             if (this.firmware && compareVersions(this.firmware, version) > 0) {
-              client.isUpdating = true;
               fs.readFile(path.join(firmwaresPath, `${this.firmware}.bin`), (err, firmware) => {
                 if (err) return;
                 Server.UpdateFirmware(client, firmware);
@@ -67,7 +66,7 @@ class Server {
     const updateNumStreams = stream > (this.cache.length - 1);
     this.cache[stream] = message;
     this.ws.clients.forEach((client) => {
-      if (!client.isUpdating) return;
+      if (client.isUpdating) return;
       if (client.stream === stream) {
         client.send(`M${message}`, () => {});
       }
