@@ -25,6 +25,7 @@ class UpdatableClient {
       const char* server,
       const uint16_t port,
       const char* url,
+      const char* thumbprint,
       const bool tls,
       const char* version
     );
