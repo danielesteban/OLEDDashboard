@@ -51,7 +51,7 @@ void onUpdate(const uint8_t percent) {
 
 void setup() {
   app.setup(config.ssid, config.password);
-  client.setup(config.server, config.port, config.tls, config.version);
+  client.setup(config.server, config.port, config.url, config.tls, config.version);
 }
 
 void loop() {

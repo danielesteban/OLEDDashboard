@@ -11,11 +11,12 @@ struct {
   const char* password;
   const char* server;
   const uint16_t port;
+  const char* url;
   const bool tls;
   const char* version;
 } config = {
   "WIFI_SSID", "WIFI_PASSWORD",
-  "SERVER_HOST", 443, true,
+  "SERVER_HOST", 443, "/", true,
   "0.0.1"
 };
 
