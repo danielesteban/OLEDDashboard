@@ -63,9 +63,9 @@ const server = new Server();
         q: `in:inbox label:unread after:${lastWeek.getFullYear()}/${lastWeek.getMonth() + 1}/${lastWeek.getDate()}`,
       }, (err, res) => {
         if (err) return;
-        const newEmails = res.data.messages.resultSizeEstimate;
+        const newEmails = res.data.resultSizeEstimate;
         server.push(stream, (
-          `${newEmails > 0 ? newEmails : 'No'} new Email${newEmails == 1 ? '' : 's'}`
+          `${newEmails > 0 ? newEmails : 'No'} Email${newEmails == 1 ? '' : 's'}`
         ));
         setTimeout(update, 30000);
       });
