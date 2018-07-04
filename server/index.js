@@ -3,6 +3,7 @@
 // dani@gatunes © 2018
 
 const request = require('request');
+const Gmail = require('./gmail');
 const Server = require('./server');
 const server = new Server();
 
@@ -47,4 +48,28 @@ const server = new Server();
     });
   };
   update();
+}
+
+// New emails
+// Stream ID: 2
+{
+  const stream = 2;
+  const gmail = new Gmail((client) => {
+    const update = () => {
+      const now = new Date();
+      const lastWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+      client.users.messages.list({
+        userId: 'me',
+        q: `in:inbox label:unread after:${lastWeek.getFullYear()}/${lastWeek.getMonth() + 1}/${lastWeek.getDate()}`,
+      }, (err, res) => {
+        if (err) return;
+        const newEmails = res.data.messages.resultSizeEstimate;
+        server.push(stream, (
+          `${newEmails > 0 ? newEmails : 'No'} new Email${newEmails == 1 ? '' : 's'}`
+        ));
+        setTimeout(update, 30000);
+      });
+    };
+    update();
+  });
 }

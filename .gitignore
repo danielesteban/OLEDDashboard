@@ -2,3 +2,4 @@
 .piolibdeps
 node_modules/
 server/firmwares/*.bin
+server/gmail/*.json

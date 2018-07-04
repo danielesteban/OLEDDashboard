@@ -138,7 +138,7 @@ class Server {
       const start = sent;
       const end = Math.min(sent + chunkSize, firmware.length);
       sent += (end - start);
-      client.send(firmware.slice(start, end), send);
+      client.send(firmware.slice(start, end), err => process.nextTick(() => send(err)));
     };
     client.isUpdating = true;
     client.send(`F${firmware.length}`, send);

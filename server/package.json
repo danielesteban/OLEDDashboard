@@ -5,6 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "compare-versions": "^3.3.0",
+    "googleapis": "^32.0.0",
     "request": "^2.87.0",
     "ws": "^5.2.1"
   },
