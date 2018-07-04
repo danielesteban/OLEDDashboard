@@ -19,18 +19,20 @@ struct {
 };
 ```
 
-The first time, upload over serial:
-- platformio run --target=upload
+##### The first time, you'll need to upload the sketch over serial (using a Raspberry PI UART or a USB2TTL dongle):
+`platformio run --target=upload --upload-port=SERIAL_PORT`
 
-Dev Server:
+### Dev Server:
+
 - cd server
 - yarn install
 - yarn dev
 
-While in development, the server will watch the output directory of platformio and try to push any compiled firmware to all connected clients.
+While in development, the server will watch the output directory of platformio and every time you run "platformio run" it will try to push the firmware to all connected clients.
 
-Production Server:
+### Production Server:
+
 - cd server
 - docker-compose -p DashboardServer up -d --build
 
-While in production, the latest firmware inside the 'server/firmwares' folder will be flashed to all clients with a prior version. The firmware filenames should follow the naming convention: "MAJOR.MINOR.PATCH.bin"
+While in production, the latest firmware inside the 'server/firmwares' folder will be flashed to all clients with a prior version. The firmware filenames should follow the naming convention: `MAJOR.MINOR.PATCH.bin`
