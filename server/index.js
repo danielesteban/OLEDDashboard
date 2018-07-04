@@ -101,7 +101,7 @@ Google.auth((auth) => {
         if (reports.length) {
           const webHits = reports[0].data.rows[0].metrics[0].values[0];
           server.push(stream, (
-            `${webHits > 0 ? webHits : 'No'} Hit{webHits == 1 ? '' : 's'}`
+            `${webHits > 0 ? webHits : 'No'} Hit${webHits == 1 ? '' : 's'}`
           ));
           setTimeout(update, 30000);
         }
