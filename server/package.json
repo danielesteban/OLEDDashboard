@@ -12,7 +12,7 @@
     "nodemon": "^1.17.5"
   },
   "scripts": {
-    "start": "node index.js",
+    "start": "forever index.js",
     "dev": "nodemon index.js"
   }
 }

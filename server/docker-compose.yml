@@ -1,0 +1,8 @@
+version: '3'
+services:
+  server:
+    build: .
+    volumes:
+     - "./firmwares:/usr/src/server/firmwares"
+    ports:
+     - "127.0.0.1:8080:8080"
