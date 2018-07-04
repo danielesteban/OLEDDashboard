@@ -92,41 +92,45 @@ class Server {
     const dir = path.dirname(update);
     const file = path.basename(update);
     fs.watch(dir, (e, name) => {
-      if (e === 'rename' && name === file && fs.existsSync(update)) {
-        setTimeout(() => {
-          fs.readFile(update, (err, firmware) => {
-            fs.unlink(update, () => {});
-            if (err) return;
-            this.ws.clients.forEach(client => Server.UpdateFirmware(client, firmware));
-          });
-        }, 500);
+      if (name !== file || !fs.existsSync(update)) {
+        return;
       }
+      clearTimeout(this.watchTimer);
+      this.watchTimer = setTimeout(() => {
+        fs.readFile(update, (err, firmware) => {
+          fs.unlink(update, () => {});
+          if (err) return;
+          this.ws.clients.forEach(client => Server.UpdateFirmware(client, firmware));
+        });
+      }, 500);
     });
   }
   watchFirmware() {
     // Automatically push the latest available firmware
     fs.watch(firmwaresPath, (e, file) => {
-      if (e === 'rename' && ~(file.indexOf('.bin'))) {
-        const version = file.substr(0, file.indexOf('.bin'));
-        if (!this.firmware || compareVersions(version, this.firmware) >= 0) {
-          setTimeout(() => {
-            this.getNewestFirmware((err, firmware) => {
-              if (err || !firmware) {
-                delete this.firmware;
-                return;
-              }
-              this.firmware = firmware;
-              fs.readFile(path.join(firmwaresPath, `${this.firmware}.bin`), (err, firmware) => {
-                if (err) return;
-                this.ws.clients.forEach(client => Server.UpdateFirmware(client, firmware));
-              });
-            });
-          }, 500);
-        }
+      if (!(~(file.indexOf('.bin')))) return;
+      const version = file.substr(0, file.indexOf('.bin'));
+      if (this.firmware && compareVersions(this.firmware, version) > 0) {
+        return;
       }
+      clearTimeout(this.watchTimer);
+      this.watchTimer = setTimeout(() => {
+        this.getNewestFirmware((err, firmware) => {
+          if (err || !firmware) {
+            delete this.firmware;
+            return;
+          }
+          this.firmware = firmware;
+          fs.readFile(path.join(firmwaresPath, `${this.firmware}.bin`), (err, firmware) => {
+            if (err) return;
+            this.ws.clients.forEach(client => Server.UpdateFirmware(client, firmware));
+          });
+        });
+      }, 500);
     });
   }
   static UpdateFirmware(client, firmware) {
+    if (client.isUpdating) return;
     if (DEVELOPMENT) console.log('sending firmware...');
     let sent = 0;
     const chunkSize = 512;
