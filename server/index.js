@@ -56,11 +56,9 @@ const server = new Server();
   const stream = 2;
   const gmail = new Gmail((client) => {
     const update = () => {
-      const now = new Date();
-      const lastWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
       client.users.messages.list({
         userId: 'me',
-        q: `in:inbox label:unread after:${lastWeek.getFullYear()}/${lastWeek.getMonth() + 1}/${lastWeek.getDate()}`,
+        q: 'in:inbox category:primary label:unread newer_than:7d',
       }, (err, res) => {
         if (err) return;
         const newEmails = res.data.resultSizeEstimate;
