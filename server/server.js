@@ -131,13 +131,13 @@ class Server {
     if (client.isUpdating) return;
     if (DEVELOPMENT) console.log('sending firmware...');
     let sent = 0;
-    const chunkSize = 512;
+    const chunkSize = 1024;
     const send = (err) => {
       if (err || sent >= firmware.length) return;
       const start = sent;
       const end = Math.min(sent + chunkSize, firmware.length);
       sent += (end - start);
-      client.send(firmware.slice(start, end), err => process.nextTick(() => send(err)));
+      client.send(firmware.slice(start, end), send);
     };
     client.isUpdating = true;
     client.send(`F${firmware.length}`, send);
