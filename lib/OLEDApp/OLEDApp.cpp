@@ -70,3 +70,9 @@ void OLEDApp::print(const char* text, const uint8_t* font) {
   display.drawString(64, 32, text);
   display.display();
 }
+
+void OLEDApp::progress(const uint8_t percent) {
+  display.clear();
+  display.drawProgressBar(0, 28, 120, 8, percent);
+  display.display();
+}

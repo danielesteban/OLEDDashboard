@@ -26,6 +26,7 @@ class OLEDApp {
     void loop();
     void clearDisplay();
     void print(const char* text, const uint8_t* font = ArialMT_Plain_16);
+    void progress(const uint8_t percent);
     SH1106Brzo display;
   private:
     struct {

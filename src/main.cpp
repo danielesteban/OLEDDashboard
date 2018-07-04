@@ -43,9 +43,7 @@ void onUpdate(const uint8_t percent) {
   if (percent == 100) {
     app.display.displayOff();
   } else {
-    app.display.clear();
-    app.display.drawProgressBar(0, 28, 120, 8, percent);
-    app.display.display();
+    app.progress(percent);
   }
 }
 
