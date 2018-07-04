@@ -1,0 +1,4 @@
+.pioenvs
+.piolibdeps
+node_modules/
+server/firmwares/*.bin
