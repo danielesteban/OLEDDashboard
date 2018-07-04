@@ -3,7 +3,7 @@
 // dani@gatunes © 2018
 
 const request = require('request');
-const Gmail = require('./gmail');
+const Google = require('./google');
 const Server = require('./server');
 const server = new Server();
 
@@ -50,11 +50,12 @@ const server = new Server();
   update();
 }
 
-// New emails
-// Stream ID: 2
-{
-  const stream = 2;
-  const gmail = new Gmail((client) => {
+Google.auth((auth) => {
+  // New emails
+  // Stream ID: 2
+  {
+    const stream = 2;
+    const client = Google.gmail(auth);
     const update = () => {
       client.users.messages.list({
         userId: 'me',
@@ -69,5 +70,43 @@ const server = new Server();
       });
     };
     update();
-  });
-}
+  }
+
+  // Web hits
+  // Stream ID: 3
+  {
+    const stream = 3;
+    const client = Google.analytics(auth);
+    const update = () => {
+      client.reports.batchGet({
+        requestBody: {
+          reportRequests: [{
+            viewId: '168848745',
+            dateRanges: [
+              {
+                startDate: '7DaysAgo',
+                endDate: 'Today'
+              }
+            ],
+            metrics: [
+              {
+                expression: 'ga:users'
+              }
+            ],
+          }],
+        },
+      }, (err, res) => {
+        if (err) return;
+        const reports = res.data.reports;
+        if (reports.length) {
+          const webHits = reports[0].data.rows[0].metrics[0].values[0];
+          server.push(stream, (
+            `${webHits > 0 ? webHits : 'No'} Hit{webHits == 1 ? '' : 's'}`
+          ));
+          setTimeout(update, 30000);
+        }
+      });
+    };
+    update();
+  }
+});
