@@ -18,7 +18,7 @@ RUN yarn install
 
 # Bundle source
 COPY *.js ./
-COPY gmail ./gmail
+COPY google ./google
 
 # De-escalate privileges
 USER node
