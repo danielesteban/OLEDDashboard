@@ -50,11 +50,28 @@ const server = new Server();
   update();
 }
 
+// Noisy frames
+// Stream ID: 2
+{
+  const stream = 2;
+  const frame = Buffer.alloc(2 + (128 * 64 / 8));
+  frame[0] = 128;
+  frame[1] = 64;
+  const update = () => {
+    for (let i = 2; i < frame.length; i += 1) {
+      frame[i] = Math.floor(Math.random() * 256);
+    }
+    server.push(stream, frame);
+    setTimeout(update, 60);
+  };
+  update();
+}
+
 Google.auth((auth) => {
   // New emails
-  // Stream ID: 2
+  // Stream ID: 3
   {
-    const stream = 2;
+    const stream = 3;
     const client = Google.gmail(auth);
     const update = () => {
       client.users.messages.list({
@@ -73,9 +90,9 @@ Google.auth((auth) => {
   }
 
   // Web hits
-  // Stream ID: 3
+  // Stream ID: 4
   {
-    const stream = 3;
+    const stream = 4;
     const client = Google.analytics(auth);
     const update = () => {
       client.reports.batchGet({

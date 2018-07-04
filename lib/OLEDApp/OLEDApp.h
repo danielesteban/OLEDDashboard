@@ -25,6 +25,7 @@ class OLEDApp {
     void setup(const char* ssid, const char* password);
     void loop();
     void clearDisplay();
+    void drawImage(uint8_t width, uint8_t height, const uint8_t* image);
     void print(const char* text, const uint8_t* font = ArialMT_Plain_16);
     void progress(const uint8_t percent);
     SH1106Brzo display;

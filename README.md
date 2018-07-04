@@ -29,6 +29,8 @@ const server = new Server();
 // This will be sent to all connected clients that have that stream selected
 // The last frame is cached to be sent when clients switch to the stream
 server.push(UINT8_STREAM_ID, 'Arbitrary data');
+// You can also push XBM images
+server.push(UINT8_STREAM_ID, Buffer.from([WIDTH, HEIGHT, PIXEL_1-8, PIXEL_9-16, ...]));
 ```
 
 You can see some example streams in: [server/index.js](server/index.js).

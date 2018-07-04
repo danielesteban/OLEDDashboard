@@ -63,6 +63,14 @@ void OLEDApp::clearDisplay() {
   display.display();
 }
 
+void OLEDApp::drawImage(uint8_t width, uint8_t height, const uint8_t* image) {
+  display.clear();
+  uint8_t x = 64 - (width / 2);
+  uint8_t y = 32 - (height / 2);
+  display.drawXbm(x, y, width, height, image);
+  display.display();
+}
+
 void OLEDApp::print(const char* text, const uint8_t* font) {
   display.setTextAlignment(TEXT_ALIGN_CENTER_BOTH);
   display.setFont(font);

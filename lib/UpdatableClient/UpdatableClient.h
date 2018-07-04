@@ -16,7 +16,11 @@
 
 class UpdatableClient {
   public:
-    UpdatableClient(void (*onMessage)(const char*), void (*onUpdate)(const uint8_t));
+    UpdatableClient(
+      void (*onImage)(uint8_t, uint8_t, const uint8_t*),
+      void (*onMessage)(const char*),
+      void (*onUpdate)(const uint8_t)
+    );
     void setup(
       const char* server,
       const uint16_t port,
@@ -31,6 +35,7 @@ class UpdatableClient {
     WebSocketsClient client;
     uint8_t numStreams;
     uint8_t stream;
+    void (*onImage)(uint8_t, uint8_t, const uint8_t*);
     void (*onMessage)(const char*);
     void (*onUpdate)(const uint8_t);
     bool hasUpdated;

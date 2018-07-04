@@ -11,9 +11,10 @@ void onButton(uint8_t button);
 OLEDApp app(PRIMARY_BUTTON, SECONDARY_BUTTON, DISPLAY_SDA, DISPLAY_SCL, onButton);
 
 // Client
+void onImage(uint8_t width, uint8_t height, const uint8_t* image);
 void onMessage(const char* message);
 void onUpdate(const uint8_t percent);
-UpdatableClient client(onMessage, onUpdate);
+UpdatableClient client(onImage, onMessage, onUpdate);
 
 // Auto-pagination
 #ifdef AUTOPAGINATION
@@ -33,6 +34,10 @@ void onButton(uint8_t button) {
   #ifdef AUTOPAGINATION
   autoPaginationTimer = millis();
   #endif
+}
+
+void onImage(uint8_t width, uint8_t height, const uint8_t* image) {
+  app.drawImage(width, height, image);
 }
 
 void onMessage(const char* message) {

@@ -53,8 +53,7 @@ class Server {
           break;
         case 'S': // Update stream
           client.stream = data[0];
-          const last = this.cache[client.stream];
-          client.send(`M${last || ''}`, () => {});
+          client.send(this.cache[client.stream], () => {});
           break;
         default:
           break;
@@ -64,11 +63,17 @@ class Server {
   }
   push(stream, message) {
     const updateNumStreams = stream > (this.cache.length - 1);
-    this.cache[stream] = message;
+    let payload;
+    if (Buffer.isBuffer(message)) {
+      payload = message;
+    } else {
+      payload = `M${message}`;
+    }
+    this.cache[stream] = payload;
     this.ws.clients.forEach((client) => {
       if (client.isUpdating) return;
       if (client.stream === stream) {
-        client.send(`M${message}`, () => {});
+        client.send(payload, () => {});
       }
       if (updateNumStreams) {
         client.send(`S${String.fromCharCode(this.cache.length)}`, () => {});
@@ -137,10 +142,10 @@ class Server {
       const start = sent;
       const end = Math.min(sent + chunkSize, firmware.length);
       sent += (end - start);
-      client.send(firmware.slice(start, end), send);
+      client.send(firmware.slice(start, end), err => process.nextTick(() => send(err)));
     };
     client.isUpdating = true;
-    client.send(`F${firmware.length}`, send);
+    client.send(`F${firmware.length}`, err => process.nextTick(() => send(err)));
   };
 };
 

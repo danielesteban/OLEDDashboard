@@ -7,11 +7,13 @@
 #include "UpdatableClient.h"
 
 UpdatableClient::UpdatableClient(
+  void (*onImage)(uint8_t, uint8_t, const uint8_t*),
   void (*onMessage)(const char*),
   void (*onUpdate)(const uint8_t)
 )
   : numStreams(0),
   stream(0),
+  onImage(onImage),
   onMessage(onMessage),
   onUpdate(onUpdate),
   hasUpdated(false),
@@ -68,7 +70,8 @@ void UpdatableClient::setup(
         }
         break;
       case WStype_BIN:
-        if (isUpdating && !Update.hasError()) {
+        if (isUpdating) {
+          if (Update.hasError()) return;
           Update.write(payload, length);
           updateReceived += length;
           if (onUpdate) onUpdate(updateReceived * 100 / updateLength);
@@ -80,6 +83,12 @@ void UpdatableClient::setup(
               client.disconnect();
             }
           }
+        } else if (
+          onImage &&
+          length > 2 &&
+          ((size_t) payload[0] * payload[1] / 8) == (length - 2)
+        ) {
+          onImage(payload[0], payload[1], payload + 2);
         }
         break;
       default:
