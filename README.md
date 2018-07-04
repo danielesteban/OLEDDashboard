@@ -1,5 +1,5 @@
-Stream 2 OLED
-=============
+OLED Dashboard
+==============
 
 Edit [src/config.h](src/config.h):
 ```
@@ -22,11 +22,15 @@ struct {
 The first time, upload over serial:
 - platformio run --target=upload
 
-Server:
+Dev Server:
 - cd server
 - yarn install
-- yarn run dev
+- yarn dev
 
 While in development, the server will watch the output directory of platformio and try to push any compiled firmware to all connected clients.
+
+Production Server:
+- cd server
+- docker-compose -p DashboardServer up -d --build
 
 While in production, the latest firmware inside the 'server/firmwares' folder will be flashed to all clients with a prior version. The firmware filenames should follow the naming convention: "MAJOR.MINOR.PATCH.bin"

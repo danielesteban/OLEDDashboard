@@ -1,4 +1,4 @@
-// Stream 2 OLED
+// OLED Dashboard
 // ===============
 // dani@gatunes © 2018
 

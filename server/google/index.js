@@ -3,7 +3,7 @@ const path = require('path');
 const readline = require('readline');
 const { google } = require('googleapis');
 
-// If modifying these scopes, delete token.json.
+// If you modify these scopes, you must delete 'server/google/token.json'.
 const SCOPES = [
   'https://www.googleapis.com/auth/analytics.readonly',
   'https://www.googleapis.com/auth/gmail.readonly'
@@ -14,7 +14,16 @@ const TOKEN_PATH = path.resolve(__dirname, 'token.json');
 module.exports = {
   auth: (callback) => {
     fs.readFile(SECRET_PATH, (err, content) => {
-      if (err) return;
+      if (err) {
+        if (process.env.NODE_ENV === 'production') return;
+        console.log(
+          "Create an OAuth 2.0 client ID by visiting this url:",
+          "https://console.developers.google.com/apis/credentials",
+          "Enable the Google Analytics Reporting API and Gmail API and",
+          "download the credentials file into 'server/google/secret.json'."
+        );
+        return;
+      }
       const credentials = JSON.parse(content);
       const { client_secret, client_id, redirect_uris } = credentials.installed;
       const client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
@@ -37,7 +46,6 @@ module.exports = {
           rl.close();
           client.getToken(code, (err, token) => {
             if (err) return;
-            // Store the token to disk for later program executions
             fs.writeFile(TOKEN_PATH, JSON.stringify(token), () => {});
             onToken(token);
           });
