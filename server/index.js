@@ -118,7 +118,7 @@ Google.auth((auth) => {
           server.push(stream, (
             `${users > 0 ? users : 'No'} User${users == 1 ? '' : 's'}`
           ));
-          setTimeout(update, 30000);
+          setTimeout(update, 60000);
         }
       });
     };
@@ -199,7 +199,7 @@ Google.auth((auth) => {
           }
           // Push the image to the clients
           server.push(stream, frame);
-          setTimeout(update, 30000);
+          setTimeout(update, 60000);
         }
       });
     };
