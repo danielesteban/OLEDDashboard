@@ -99,7 +99,7 @@ void UpdatableClient::setup(
   if (tls) {
     client.beginSSL(server, port, url, thumbprint);
   } else {
-    client.begin(server, port, url, thumbprint);
+    client.begin(server, port, url);
   }
 }
 

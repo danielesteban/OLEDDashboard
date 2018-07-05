@@ -68,13 +68,15 @@ const server = new Server();
 }
 
 Google.auth((auth) => {
+  const analytics = Google.analytics(auth);
+  const gmail = Google.gmail(auth);
+
   // New emails
   // Stream ID: 3
   {
     const stream = 3;
-    const client = Google.gmail(auth);
     const update = () => {
-      client.users.messages.list({
+      gmail.users.messages.list({
         userId: 'me',
         q: 'in:inbox category:primary label:unread newer_than:7d',
       }, (err, res) => {
@@ -89,36 +91,113 @@ Google.auth((auth) => {
     update();
   }
 
-  // Web hits
+  // Web users in last month (Graph)
   // Stream ID: 4
   {
     const stream = 4;
-    const client = Google.analytics(auth);
-    const update = () => {
-      client.reports.batchGet({
-        requestBody: {
-          reportRequests: [{
-            viewId: '168848745',
-            dateRanges: [
-              {
-                startDate: '7DaysAgo',
-                endDate: 'Today'
-              }
-            ],
-            metrics: [
-              {
-                expression: 'ga:users'
-              }
-            ],
+    const request = {
+      requestBody: {
+        reportRequests: [{
+          viewId: '168848745',
+          dateRanges: [{
+            startDate: '32DaysAgo',
+            endDate: 'Today',
           }],
-        },
-      }, (err, res) => {
+          metrics: [{
+            expression: 'ga:users',
+          }],
+          dimensions: [{
+            name: 'ga:date',
+          }],
+        }],
+      },
+    };
+    const getDateFromToday = (offset) => {
+      const now = new Date();
+      const target = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() + offset
+      );
+      const date = target.getDate();
+      const month = target.getMonth() + 1;
+      const year = target.getFullYear();
+      return (
+        `${year}` +
+        `${month < 10 ? '0' : ''}${month}` +
+        `${date < 10 ? '0' : ''}${date}`
+      );
+    };
+    const update = () => {
+      // Fetch the last 32 days user count
+      analytics.reports.batchGet(request, (err, res) => {
         if (err) return;
         const reports = res.data.reports;
         if (reports.length) {
-          const webHits = reports[0].data.rows[0].metrics[0].values[0];
+          let max = 0;
+          // Reformat the data
+          const hits = reports[0].data.rows
+            .map(({
+              dimensions: [date],
+              metrics: [{ values: [users] }]
+            }) => ({ date, users }))
+            .reduce((map, { date, users }) => {
+              map[date] = parseInt(users, 10);
+              max = Math.max(max, map[date]);
+              return map;
+            }, {});
+          max *= 1.1;
+          const ratio = 64 / max;
+          const frame = Buffer.alloc(2 + (128 * 64 / 8));
+          frame[0] = 128;
+          frame[1] = 64;
+          // Graph it out
+          for (let i = 0; i < 32; i += 1) {
+            const date = getDateFromToday(-31 + i);
+            const height = Math.floor((hits[date] || 0) * ratio);
+            for (let y = 0; y < height; y += 1) {
+              for (let x = (i * 4); x < ((i * 4) + 3); x += 1) {
+                const byteIndex = 2 + ((63 - y) * 16) + Math.floor(x / 8);
+                const bitIndex = Math.floor(x % 8);
+                frame[byteIndex] |= ((1 << bitIndex) & 0xFF);
+              }
+            }
+          }
+          // Push the image to the clients
+          server.push(stream, frame);
+          setTimeout(update, 30000);
+        }
+      });
+    };
+    update();
+  }
+
+  // Web users in last month (Count)
+  // Stream ID: 5
+  {
+    const stream = 5;
+    const request = {
+      requestBody: {
+        reportRequests: [{
+          viewId: '168848745',
+          dateRanges: [{
+            startDate: '32DaysAgo',
+            endDate: 'Today',
+          }],
+          metrics: [{
+            expression: 'ga:users',
+          }],
+        }],
+      },
+    };
+    const update = () => {
+      analytics.reports.batchGet(request, (err, res) => {
+        if (err) return;
+        const reports = res.data.reports;
+        if (reports.length) {
+          const users = reports[0].data.rows[0].metrics[0].values[0];
           server.push(stream, (
-            `${webHits > 0 ? webHits : 'No'} Hit${webHits == 1 ? '' : 's'}`
+            `${users > 0 ? users : 'No'} User${users == 1 ? '' : 's'}`
           ));
           setTimeout(update, 30000);
         }
