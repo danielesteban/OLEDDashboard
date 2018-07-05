@@ -190,7 +190,7 @@ Google.auth((auth) => {
             const date = getDateFromToday(-31 + i);
             const height = Math.floor((hits[date] || 0) * ratio);
             for (let y = 0; y < height; y += 1) {
-              for (let x = (i * 4); x < ((i * 4) + 3); x += 1) {
+              for (let x = ((i * 4) + 1); x < ((i * 4) + 3); x += 1) {
                 const byteIndex = 2 + ((63 - y) * 16) + Math.floor(x / 8);
                 const bitIndex = Math.floor(x % 8);
                 frame[byteIndex] |= ((1 << bitIndex) & 0xFF);
