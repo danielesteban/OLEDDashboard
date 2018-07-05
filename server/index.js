@@ -91,10 +91,44 @@ Google.auth((auth) => {
     update();
   }
 
-  // Web users in last month (Graph)
+  // Web users in last month (Count)
   // Stream ID: 4
   {
     const stream = 4;
+    const request = {
+      requestBody: {
+        reportRequests: [{
+          viewId: '168848745',
+          dateRanges: [{
+            startDate: '32DaysAgo',
+            endDate: 'Today',
+          }],
+          metrics: [{
+            expression: 'ga:users',
+          }],
+        }],
+      },
+    };
+    const update = () => {
+      analytics.reports.batchGet(request, (err, res) => {
+        if (err) return;
+        const reports = res.data.reports;
+        if (reports.length) {
+          const users = reports[0].data.rows[0].metrics[0].values[0];
+          server.push(stream, (
+            `${users > 0 ? users : 'No'} User${users == 1 ? '' : 's'}`
+          ));
+          setTimeout(update, 30000);
+        }
+      });
+    };
+    update();
+  }
+
+  // Web users in last month (Graph)
+  // Stream ID: 5
+  {
+    const stream = 5;
     const request = {
       requestBody: {
         reportRequests: [{
@@ -165,40 +199,6 @@ Google.auth((auth) => {
           }
           // Push the image to the clients
           server.push(stream, frame);
-          setTimeout(update, 30000);
-        }
-      });
-    };
-    update();
-  }
-
-  // Web users in last month (Count)
-  // Stream ID: 5
-  {
-    const stream = 5;
-    const request = {
-      requestBody: {
-        reportRequests: [{
-          viewId: '168848745',
-          dateRanges: [{
-            startDate: '32DaysAgo',
-            endDate: 'Today',
-          }],
-          metrics: [{
-            expression: 'ga:users',
-          }],
-        }],
-      },
-    };
-    const update = () => {
-      analytics.reports.batchGet(request, (err, res) => {
-        if (err) return;
-        const reports = res.data.reports;
-        if (reports.length) {
-          const users = reports[0].data.rows[0].metrics[0].values[0];
-          server.push(stream, (
-            `${users > 0 ? users : 'No'} User${users == 1 ? '' : 's'}`
-          ));
           setTimeout(update, 30000);
         }
       });
