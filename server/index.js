@@ -117,7 +117,7 @@ Google.auth((auth) => {
     const request = {
       requestBody: {
         reportRequests: [{
-          viewId: '168848745',
+          viewId: '177123824',
           dateRanges: [{
             startDate: '32DaysAgo',
             endDate: 'Today',
@@ -151,7 +151,7 @@ Google.auth((auth) => {
     const request = {
       requestBody: {
         reportRequests: [{
-          viewId: '168848745',
+          viewId: '177123824',
           dateRanges: [{
             startDate: '32DaysAgo',
             endDate: 'Today',
