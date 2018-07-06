@@ -4,5 +4,6 @@ services:
     build: .
     volumes:
      - "./firmwares:/usr/src/server/firmwares"
+     - "./gifs:/usr/src/server/gifs"
     ports:
      - "127.0.0.1:8080:8080"

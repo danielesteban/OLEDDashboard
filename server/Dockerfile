@@ -17,7 +17,7 @@ COPY yarn.lock .
 RUN yarn install
 
 # Bundle source
-COPY *.js *.gif ./
+COPY *.js ./
 COPY google ./google
 
 # De-escalate privileges
