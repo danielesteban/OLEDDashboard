@@ -66,15 +66,33 @@ const server = new Server();
   update();
 }
 
+// Gif player
+// Stream ID: 3
+{
+  const stream = 3;
+  const GifPlayer = require('./gifplayer');
+  const path = require('path');
+  const player = new GifPlayer({
+    image: path.resolve(__dirname, 'test.gif'),
+    threshold: 0.12,
+  });
+  const update = () => {
+    const { frame, delay } = player.getFrame();
+    server.push(stream, frame);
+    setTimeout(update, delay);
+  };
+  update();
+}
+
 const Google = require('./google');
 Google.auth((auth) => {
   const analytics = Google.analytics(auth);
   const gmail = Google.gmail(auth);
 
   // New emails
-  // Stream ID: 3
+  // Stream ID: 4
   {
-    const stream = 3;
+    const stream = 4;
     const update = () => {
       gmail.users.messages.list({
         userId: 'me',
@@ -92,9 +110,9 @@ Google.auth((auth) => {
   }
 
   // Web users in last month (Count)
-  // Stream ID: 4
+  // Stream ID: 5
   {
-    const stream = 4;
+    const stream = 5;
     const request = {
       requestBody: {
         reportRequests: [{
@@ -126,9 +144,9 @@ Google.auth((auth) => {
   }
 
   // Web users in last month (Graph)
-  // Stream ID: 5
+  // Stream ID: 6
   {
-    const stream = 5;
+    const stream = 6;
     const request = {
       requestBody: {
         reportRequests: [{
@@ -206,21 +224,3 @@ Google.auth((auth) => {
     update();
   }
 });
-
-// Gif player
-// Stream ID: 6
-{
-  const stream = 6;
-  const GifPlayer = require('./gifplayer');
-  const path = require('path');
-  const player = new GifPlayer({
-    image: path.resolve(__dirname, 'test.gif'),
-    threshold: 0.12,
-  });
-  const update = () => {
-    const { frame, delay } = player.getFrame();
-    server.push(stream, frame);
-    setTimeout(update, delay);
-  };
-  update();
-}
