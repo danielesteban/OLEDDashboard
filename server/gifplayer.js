@@ -7,10 +7,11 @@ class GifPlayer {
   constructor({
     directory,
     image,
-    loop,
-    threshold,
+    duration = 5,
+    threshold = 0.1,
   }) {
     if (!directory && !image) throw new Error('You must provide a directory or image');
+    this.duration = duration;
     this.images = [];
     if (image) this.images.push(image);
     if (directory) {
@@ -19,9 +20,6 @@ class GifPlayer {
     }
     this.setImage(0);
     this.setThreshold(threshold);
-    this.loops = loop;
-    this.loop = 0;
-    this.frame = 0;
   }
   setImage(image) {
     delete this.pixels;
@@ -42,13 +40,22 @@ class GifPlayer {
     this.buffer = Buffer.alloc(2 + Math.ceil(this.info.width * this.info.height / 8));
     this.buffer[0] = this.info.width;
     this.buffer[1] = this.info.height;
+    this.time = 0;
+    this.frame = 0;
     this.image = image;
   }
   setThreshold(threshold) {
     this.threshold = threshold;
   }
   getFrame() {
-    const { buffer, frame, info, loops, pixels, threshold } = this;
+    const {
+      buffer,
+      duration,
+      frame,
+      info,
+      pixels,
+      threshold,
+    } = this;
     if (pixels) {
       const stride = pixels.stride[0];
       const o = stride * frame;
@@ -71,9 +78,8 @@ class GifPlayer {
     this.frame += 1;
     if (this.frame >= info.images.length) {
       this.frame = 0;
-      this.loop += 1;
-      if (this.loop >= loops) {
-        this.loop = 0;
+      this.time += info.duration / 1000;
+      if (this.time >= duration) {
         this.setImage((this.image + 1) % this.images.length);
       }
     }
