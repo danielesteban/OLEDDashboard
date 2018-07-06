@@ -2,8 +2,6 @@
 // ===============
 // dani@gatunes © 2018
 
-const request = require('request');
-const Google = require('./google');
 const Server = require('./server');
 const server = new Server();
 
@@ -35,6 +33,7 @@ const server = new Server();
   const city = 3117735;
   const units = 'metric';
   const key = 'ddf6dee09a9ebb7ebf3553cc27278220';
+  const request = require('request');
   const update = () => {
     request.get({
       url: `https://api.openweathermap.org/data/2.5/weather?id=${city}&units=${units}&appid=${key}`,
@@ -67,6 +66,7 @@ const server = new Server();
   update();
 }
 
+const Google = require('./google');
 Google.auth((auth) => {
   const analytics = Google.analytics(auth);
   const gmail = Google.gmail(auth);
@@ -206,3 +206,21 @@ Google.auth((auth) => {
     update();
   }
 });
+
+// Gif player
+// Stream ID: 6
+{
+  const stream = 6;
+  const GifPlayer = require('./gifplayer');
+  const path = require('path');
+  const player = new GifPlayer({
+    image: path.resolve(__dirname, 'test.gif'),
+    threshold: 0.12,
+  });
+  const update = () => {
+    const { frame, delay } = player.getFrame();
+    server.push(stream, frame);
+    setTimeout(update, delay);
+  };
+  update();
+}
