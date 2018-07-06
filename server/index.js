@@ -73,7 +73,8 @@ const server = new Server();
   const GifPlayer = require('./gifplayer');
   const path = require('path');
   const player = new GifPlayer({
-    image: path.resolve(__dirname, 'test.gif'),
+    directory: path.resolve(__dirname, 'gifs'),
+    loop: 5,
     threshold: 0.12,
   });
   const update = () => {
