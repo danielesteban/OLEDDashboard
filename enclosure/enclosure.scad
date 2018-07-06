@@ -1,8 +1,8 @@
 // Parametric dimensions
 WALL = 6;
-WIDTH = 32;
-LENGTH = 32;
-HEIGHT = 34;
+WIDTH = 28;
+LENGTH = 28;
+HEIGHT = 30;
 
 // Select what to export
 EXPORT_ENCLOSURE = true;
@@ -27,7 +27,7 @@ color("Blue") {
     // Main body
     Box(WIDTH + (WALL * 2), LENGTH + (WALL * 2), HEIGHT + (WALL * 2));
     // Make it hollow
-    translate([0, 0, -WALL]) {
+    translate([0, 0, WALL * -0.5]) {
       cube([WIDTH, LENGTH, HEIGHT + WALL * 2], center = true);
     }
     // Cut open the bottom
@@ -39,7 +39,7 @@ color("Blue") {
       Box(WIDTH , (LENGTH * 0.5), HEIGHT);
     }
     // Board beds
-    offset = (WALL * (1 / 2));
+    offset = WALL * 0.5;
     for (a = [0:3]) {
       rotate([0, 0, 90 * a]) {
         translate([0, LENGTH * 0.5, -offset]) {
@@ -66,28 +66,42 @@ color("Blue") {
 if (EXPORT_LID)
 translate([EXPORT_ENCLOSURE ? WIDTH : 0, 0, 0])
 color("Blue") {
-  difference() {
-    // Main body
-    Box(WIDTH + (WALL * 2), LENGTH + (WALL * 2), HEIGHT + (WALL * 2));
-    // Cut the top out
-    translate([0, 0, WALL]) {
-      cube([WIDTH * 2, LENGTH * 2, HEIGHT + (WALL * 2)], center = true);
+  union() {
+    difference() {
+      // Main body
+      Box(WIDTH + (WALL * 2), LENGTH + (WALL * 2), HEIGHT + (WALL * 2));
+      // Cut the top out
+      translate([0, 0, WALL]) {
+        cube([WIDTH * 2, LENGTH * 2, HEIGHT + (WALL * 2)], center = true);
+      }
+      // Power cord window
+      translate([0, 0, HEIGHT * -0.5]) {
+        Box(WIDTH * 0.3, WIDTH * 0.15, HEIGHT, 0.6);
+      }
+      // Labels
+      translate([0, 0, HEIGHT * -0.5 - WALL * 0.75])
+      rotate([180, 0, 180]) {
+        translate([0, LENGTH * (1/3), 0])
+        linear_extrude(height = WALL) {
+          text("OLED", size = 6, font = "monospace", halign = "center", valign = "center", $fn = 16);
+        }
+        translate([0, LENGTH * -(1/3), 0])
+        linear_extrude(height = WALL) {
+          text("DASHBOARD", size = 4, font = "monospace", halign = "center", valign = "center", $fn = 16);
+        }
+      }
     }
-    // Power cord window
-    translate([0, 0, HEIGHT * -0.5]) {
-      Box(WIDTH * 0.3, WIDTH * 0.15, HEIGHT, 0.6);
-    }
-  }
-  // Pressure fits
-  offset = (WALL * (1 / 2));
-  for (a = [0:3]) {
-    rotate([0, 0, 90 * a]) {
-      translate([0, LENGTH * 0.5, HEIGHT * -0.5]) {
-        cube([
-          WIDTH - (offset * 2),
-          offset * 1.5,
-          offset * 2
-        ], center = true);
+    // Pressure fits
+    offset = WALL * 0.5;
+    for (a = [0:3]) {
+      rotate([0, 0, 90 * a]) {
+        translate([0, LENGTH * 0.5, HEIGHT * -0.5]) {
+          cube([
+            WIDTH - (offset * 2.5),
+            offset * 1.5,
+            offset * 2
+          ], center = true);
+        }
       }
     }
   }
