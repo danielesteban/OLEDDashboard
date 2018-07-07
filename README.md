@@ -1,7 +1,24 @@
 OLED Dashboard
 ==============
 
-Edit [src/config.h](src/config.h):
+![Enclosure](enclosure/enclosure.jpg)
+
+#### Part list
+
+- SSD1306 OLED display
+- 4 angled female headers
+- 8 straight female headers
+- 1 10µf decoupling capacitor
+- 1 L1117 3.3v voltage regulator
+- 1 ESP8266 module (ESP-01 package)
+- 2 Push buttons
+- 4 pieces of perfboard
+- A bunch of wire & some solder
+
+![Parts](enclosure/parts.jpg)
+
+##### Edit [src/config.h](src/config.h):
+
 ```c++
 // Network config
 struct {
@@ -21,7 +38,7 @@ struct {
 };
 ```
 
-##### The first time, you'll need to upload the sketch over serial (using a Raspberry PI UART or a USB2TTL dongle):
+##### The first time, you'll need to upload the sketch over serial (using a Raspberry PI's UART or a USB2TTL dongle):
 `platformio run --target=upload --upload-port=SERIAL_PORT`
 
 #### Pushing data:
