@@ -5,6 +5,7 @@ OLED Dashboard
 
 #### Part list
 
+- [3D printed enclosure](enclosure/enclosure.stl)
 - SSD1306 OLED display
 - 4 angled female headers
 - 8 straight female headers
