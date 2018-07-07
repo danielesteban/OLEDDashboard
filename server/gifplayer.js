@@ -37,7 +37,7 @@ class GifPlayer {
       }
       this.pixels = pixels;
     });
-    this.buffer = Buffer.alloc(2 + Math.ceil(this.info.width * this.info.height / 8));
+    this.buffer = Buffer.alloc(2 + this.info.width * Math.ceil(this.info.height / 8));
     this.buffer[0] = this.info.width;
     this.buffer[1] = this.info.height;
     this.time = 0;
@@ -58,16 +58,21 @@ class GifPlayer {
     } = this;
     if (pixels) {
       const stride = pixels.stride[0];
-      const o = stride * frame;
+      const offset = stride * frame;
+      const width = pixels.shape[1];
+      const height = pixels.shape[2];
+      const rasterheight = Math.ceil(height / 8);
       for (let i = 0; i < stride; i += 4) {
         const gray = (
-          ((pixels.data[o + i] / 255) * 0.299) +
-          ((pixels.data[o + i + 1] / 255) * 0.587) +
-          ((pixels.data[o + i + 2] / 255) * 0.114)
+          ((pixels.data[offset + i] / 255) * 0.299) +
+          ((pixels.data[offset + i + 1] / 255) * 0.587) +
+          ((pixels.data[offset + i + 2] / 255) * 0.114)
         ) / 3;
         const pixel = Math.floor(i / 4);
-        const byteIndex = 2 + Math.floor(pixel / 8);
-        const bitIndex = Math.floor(pixel % 8);
+        const x = pixel % width;
+        const y = Math.floor(pixel / width);
+        const byteIndex = 2 + (x * rasterheight) + Math.floor(y / 8);
+        const bitIndex = y % 8;
         if (gray >= threshold) {
           buffer[byteIndex] |= (1 << bitIndex);
         } else {

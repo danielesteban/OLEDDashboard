@@ -87,7 +87,7 @@ void UpdatableClient::setup(
         } else if (
           onImage &&
           length > 2 &&
-          ((size_t) payload[0] * payload[1] / 8) == (length - 2)
+          ((size_t) payload[0] * (1 + ((payload[1] - 1) >> 3))) == (length - 2)
         ) {
           onImage(payload[0], payload[1], payload + 2);
         }
