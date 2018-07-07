@@ -3,6 +3,8 @@
 // dani@gatunes © 2018
 
 const Server = require('./server');
+const Image = require('./image');
+
 const server = new Server();
 
 // Here are some example streams:
@@ -53,14 +55,12 @@ const server = new Server();
 // Stream ID: 2
 {
   const stream = 2;
-  const frame = Buffer.alloc(2 + (128 * 64 / 8));
-  frame[0] = 128;
-  frame[1] = 64;
+  const image = new Image(128, 64);
   const update = () => {
-    for (let i = 2; i < frame.length; i += 1) {
-      frame[i] = Math.floor(Math.random() * 256);
+    for (let i = 2; i < image.buffer.length; i += 1) {
+      image.buffer[i] = Math.floor(Math.random() * 256);
     }
-    server.push(stream, frame);
+    server.push(stream, image);
     setTimeout(update, 60);
   };
   update();
@@ -78,8 +78,8 @@ const server = new Server();
   });
   const update = () => {
     const { frame, delay } = player.getFrame();
-    server.push(stream, frame);
-    setTimeout(update, delay);
+    if (frame) server.push(stream, frame);
+    setTimeout(update, delay || 0);
   };
   update();
 }
@@ -180,6 +180,7 @@ Google.auth((auth) => {
         `${date < 10 ? '0' : ''}${date}`
       );
     };
+    const image = new Image(128, 64);
     const update = () => {
       // Fetch the last 32 days user count
       analytics.reports.batchGet(request, (err, res) => {
@@ -200,24 +201,19 @@ Google.auth((auth) => {
             }, {});
           max *= 1.1;
           const ratio = 64 / max;
-          const frame = Buffer.alloc(2 + (128 * 64 / 8));
-          frame[0] = 128;
-          frame[1] = 64;
+          image.clear();
           // Graph it out
           for (let i = 0; i < 32; i += 1) {
             const date = getDateFromToday(-31 + i);
             const height = Math.floor((hits[date] || 0) * ratio);
             for (let y = 0; y < height; y += 1) {
               for (let x = ((i * 4) + 1) - 1; x < ((i * 4) + 3) - 1; x += 1) {
-                const invY = 63 - y;
-                const byteIndex = 2 + (x * 8) + Math.floor(invY / 8);
-                const bitIndex = invY % 8;
-                frame[byteIndex] |= (1 << bitIndex);
+                image.setPixel(x, 63 - y, true);
               }
             }
           }
           // Push the image to the clients
-          server.push(stream, frame);
+          server.push(stream, image);
           setTimeout(update, 60000);
         }
       });

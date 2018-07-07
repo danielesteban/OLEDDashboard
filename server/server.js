@@ -9,6 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const ws = require('ws');
 const compareVersions = require('compare-versions');
+const Image = require('./image');
 
 const firmwaresPath = path.resolve(__dirname, 'firmwares');
 
@@ -64,8 +65,8 @@ class Server {
   push(stream, message) {
     const updateNumStreams = stream > (this.cache.length - 1);
     let payload;
-    if (Buffer.isBuffer(message)) {
-      payload = message;
+    if (message instanceof Image) {
+      payload = message.buffer;
     } else {
       payload = `M${message}`;
     }
