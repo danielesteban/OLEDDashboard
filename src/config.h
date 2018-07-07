@@ -25,10 +25,10 @@ struct {
 // I/O config
 #define DISPLAY_SDA 0
 #define DISPLAY_SCL 2
-#define PRIMARY_BUTTON 3
-#define SECONDARY_BUTTON 1
+#define PRIMARY_BUTTON 1
+#define SECONDARY_BUTTON 3
 
 // Auto-pagination
-#define AUTOPAGINATION 10000
+#define AUTOPAGINATION 20000
 
 #endif // config_h
