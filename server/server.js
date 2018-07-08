@@ -66,7 +66,7 @@ class Server {
     const updateNumStreams = stream > (this.cache.length - 1);
     let payload;
     if (message instanceof Image) {
-      payload = message.buffer;
+      payload = Buffer.from(message.buffer);
     } else {
       payload = `M${message}`;
     }
