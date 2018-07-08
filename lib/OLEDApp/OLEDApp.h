@@ -11,6 +11,7 @@
 
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
+#include <ESP8266WebServer.h>
 #include <SH1106Brzo.h>
 
 class OLEDApp {
@@ -22,7 +23,7 @@ class OLEDApp {
       const uint8_t displaySCL,
       void (*onButton)(const uint8_t)
     );
-    void setup(const char* ssid, const char* password);
+    void setup();
     void loop();
     void clearDisplay();
     void drawImage(uint8_t width, uint8_t height, const uint8_t* image);
@@ -37,6 +38,8 @@ class OLEDApp {
       uint32_t debounce;
     } buttons[2];
     void (*onButton)(const uint8_t);
+    void setupNetwork();
+    ESP8266WebServer* setupNetworkServer;
 };
 
 #endif // OLEDApp_h

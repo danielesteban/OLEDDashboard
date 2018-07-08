@@ -53,9 +53,9 @@ void onUpdate(const uint8_t percent) {
 }
 
 void setup() {
-  app.setup(config.ssid, config.password);
+  app.setup();
   client.setup(
-    config.server, config.port, config.url, config.thumbprint, config.tls,
+    config.server, config.port, config.path, config.thumbprint, config.tls,
     config.version
   );
 }

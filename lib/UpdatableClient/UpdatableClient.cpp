@@ -25,7 +25,7 @@ UpdatableClient::UpdatableClient(
 void UpdatableClient::setup(
   const char* server,
   const uint16_t port,
-  const char* url,
+  const char* path,
   const char* thumbprint,
   const bool tls,
   const char* version
@@ -97,9 +97,9 @@ void UpdatableClient::setup(
     }
   });
   if (tls) {
-    client.beginSSL(server, port, url, thumbprint);
+    client.beginSSL(server, port, path, thumbprint);
   } else {
-    client.begin(server, port, url);
+    client.begin(server, port, path);
   }
 }
 

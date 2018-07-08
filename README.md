@@ -18,21 +18,18 @@ OLED Dashboard
 
 ![Parts](enclosure/parts.jpg)
 
-##### Edit [src/config.h](src/config.h):
+#### Edit server config in: [src/config.h](src/config.h)
 
 ```c++
-// Network config
+// Server config
 struct {
-  const char* ssid;
-  const char* password;
   const char* server;
   const uint16_t port;
-  const char* url;
+  const char* path;
   const char* thumbprint;
   const bool tls;
   const char* version;
 } config = {
-  "WIFI_SSID", "WIFI_PASSWORD",
   "SERVER_HOST", 443, "/",
   "TLS_CERT_THUMBPRINT", true,
   "FIRMWARE_VERSION"
@@ -41,6 +38,16 @@ struct {
 
 ##### The first time, you'll need to upload the sketch over serial (using a Raspberry PI's UART or a USB2TTL dongle):
 `platformio run --target=upload --upload-port=SERIAL_PORT`
+
+#### Network config:
+
+- Hold the secondary button while powering the board
+- It will start a WiFi access point with the ssid: "OLED-YOUR_CHIP_ID".
+- The OLED will display a random password
+- Use that password to connect that network with any device that has a web browser
+- Visit: http://192.168.1.1/
+- Select a network, type the password and hit submit
+- The board will automatically restart and resume normal operation.
 
 #### Pushing data:
 

@@ -17,10 +17,11 @@ OLEDApp::OLEDApp(
 )
   : display(0x3C, displaySDA, displaySCL),
   buttons{{ buttonPrimary, HIGH, HIGH, 0 }, { buttonSecondary, HIGH, HIGH, 0 }},
-  onButton(onButton)
+  onButton(onButton),
+  setupNetworkServer(NULL)
   { }
 
-void OLEDApp::setup(const char* ssid, const char* password) {
+void OLEDApp::setup() {
   // Buttons
   for (int i = 0; i < 2; i++) {
     pinMode(buttons[i].pin, INPUT_PULLUP);
@@ -28,16 +29,90 @@ void OLEDApp::setup(const char* ssid, const char* password) {
   // Display
   display.init();
   display.flipScreenVertically();
+  // Setup network config server if requested/unconfigured
+  if (digitalRead(buttons[1].pin) == LOW || WiFi.getMode() != WIFI_STA) {
+    setupNetwork();
+    return;
+  }
   // WiFi
-  print(ssid);
-  WiFi.mode(WIFI_STA);
-  WiFi.setSleepMode(WIFI_NONE_SLEEP);
-  WiFi.setPhyMode(WIFI_PHY_MODE_11B);
-  WiFi.begin(ssid, password);
+  print(WiFi.SSID().c_str());
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
   }
   clearDisplay();
+}
+
+void OLEDApp::setupNetwork() {
+  // Generate SSID
+  String ssid = "OLED-";
+  ssid += String(ESP.getChipId(), HEX);
+  // Generate random password
+  String password = "";
+  for (int i = 0; i < 8; i ++) {
+    password += (char) ('0' + (RANDOM_REG32 % 10));
+  }
+  print(password.c_str());
+  // Start access point with a fixed IP address
+  WiFi.persistent(false);
+  WiFi.mode(WIFI_AP);
+  IPAddress address(192, 168, 1, 1);
+  IPAddress gateway(192, 168, 1, 1);
+  IPAddress subnet(255, 255, 255, 0);
+  WiFi.softAPConfig(address, gateway, subnet);
+  WiFi.softAP(ssid.c_str(), password.c_str());
+  // Setup server
+  setupNetworkServer = new ESP8266WebServer(80);
+  // Form
+  setupNetworkServer->on("/", HTTP_GET, [this]() {
+    String response = (
+      "<form action=\"/\" method=\"post\">"
+      "SSID:<br />"
+      "<select name=\"ssid\">"
+    );
+    int n = WiFi.scanNetworks();
+    for (int i = 0; i < n; i ++) {
+      response += "<option>" + WiFi.SSID(i) + "</option>";
+    }
+    response += (
+      "</select><br />"
+      "Password:<br />"
+      "<input type=\"password\" name=\"password\" /><br />"
+      "<button type=\"submit\">Submit</button>"
+      "</form>"
+    );
+    setupNetworkServer->send(200, "text/html", response);
+  });
+  // Endpoint
+  setupNetworkServer->on("/", HTTP_POST, [this]() {
+    String ssid;
+    String password;
+    for (uint8_t i = 0; i < setupNetworkServer->args(); i++) {
+      if (setupNetworkServer->argName(i).equals("ssid")) {
+        ssid = setupNetworkServer->arg(i);
+      } else if (setupNetworkServer->argName(i).equals("password")) {
+        password = setupNetworkServer->arg(i);
+      }
+    }
+    if (ssid.length() && password.length()) {
+      setupNetworkServer->send(200, "text/plain", "OK. Restarting...");
+      delay(500);
+      WiFi.persistent(true);
+      WiFi.mode(WIFI_STA);
+      WiFi.setSleepMode(WIFI_NONE_SLEEP);
+      WiFi.setPhyMode(WIFI_PHY_MODE_11B);
+      WiFi.begin(ssid.c_str(), password.c_str());
+      ESP.restart();
+    } else {
+      setupNetworkServer->send(200, "text/plain", "FAIL.");
+    }
+  });
+  // Handle 404s
+  setupNetworkServer->onNotFound([this]() {
+    setupNetworkServer->send(404);
+  });
+  // Run the server until a successful config causes it to restart
+  setupNetworkServer->begin();
+  for (;;) setupNetworkServer->handleClient();
 }
 
 void OLEDApp::loop() {
