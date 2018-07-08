@@ -4,6 +4,11 @@ WIDTH = 28;
 LENGTH = 28;
 HEIGHT = 28;
 
+// Lid labels
+// $LID_LABEL_TOP = "OLED";
+// $LID_LABEL_BOTTOM = "DASHBOARD";
+// $LID_LABEL_BOTTOM_SIZE = 4;
+
 // Select what to export
 EXPORT_ENCLOSURE = true;
 EXPORT_LID = true;
@@ -85,15 +90,19 @@ color("Blue") {
       // Labels
       translate([0, 0, HEIGHT * -0.5 - WALL * 0.75])
       rotate([180, 0, 180]) {
+        if ($LID_LABEL_TOP != undef)
         translate([0, LENGTH * (1/3), 0])
         scale([1, 2, 1])
         linear_extrude(height = WALL) {
-          text("8-BIT", size = 5, font = "monospace", halign = "center", valign = "center", $fn = 16);
+          size = $LID_LABEL_TOP_SIZE == undef ? 5 : $LID_LABEL_TOP_SIZE;
+          text($LID_LABEL_TOP, size = size, font = "monospace", halign = "center", valign = "center", $fn = 16);
         }
+        if ($LID_LABEL_BOTTOM != undef)
         translate([0, LENGTH * -(1/3), 0])
         scale([1, 2, 1])
         linear_extrude(height = WALL) {
-          text("TV", size = 5, font = "monospace", halign = "center", valign = "center", $fn = 16);
+          size = $LID_LABEL_BOTTOM_SIZE == undef ? 5 : $LID_LABEL_BOTTOM_SIZE;
+          text($LID_LABEL_BOTTOM, size = size, font = "monospace", halign = "center", valign = "center", $fn = 16);
         }
       }
     }
