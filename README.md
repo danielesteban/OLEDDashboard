@@ -44,7 +44,7 @@ struct {
 - Hold the secondary button while powering the board
 - It will start a WiFi access point with the ssid: "OLED-YOUR_CHIP_ID".
 - The OLED will display a random password
-- Use that password to connect that network with any device that has a web browser
+- Use that password to connect to that network with any device that has a web browser
 - Visit: http://192.168.1.1/
 - Select a network, type the password and hit submit
 - The board will automatically restart and resume normal operation.
