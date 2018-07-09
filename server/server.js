@@ -18,6 +18,7 @@ class Server {
     this.cache = [];
     this.ws = new ws.Server({ port: PORT });
     this.ws.on('connection', this.onClient.bind(this));
+    this.generateStaticNoiseStream();
     this.getNewestFirmware((err, firmware) => {
       if (!err && firmware) {
         this.firmware = firmware;
@@ -30,12 +31,11 @@ class Server {
     });
   }
   onClient(client) {
-    if (DEVELOPMENT) {
-      console.log('client connected');
-      client.on('close', () => {
-        console.log('client disconnected');
-      });
-    }
+    if (DEVELOPMENT) console.log('client connected');
+    client.on('close', () => {
+      if (DEVELOPMENT) console.log('client disconnected');
+      if (client.setStreamTimer) clearTimeout(client.setStreamTimer);
+    });
     client.on('message', (payload) => {
       if (client.isUpdating) return;
       const method = String.fromCharCode(payload[0]);
@@ -53,8 +53,19 @@ class Server {
           }
           break;
         case 'S': // Update stream
-          client.stream = data[0];
-          client.send(this.cache[client.stream], () => {});
+          {
+            const stream = data[0];
+            delete client.stream;
+            client.send(this.noStream.buffer, () => {});
+            // Delay update the stream (while sending some static noise)
+            // to simulate the effect of an old-school TV changing channels
+            if (client.setStreamTimer) clearTimeout(client.setStreamTimer);
+            client.setStreamTimer = setTimeout(() => {
+              delete client.setStreamTimer;
+              client.stream = stream;
+              client.send(this.cache[stream], () => {});
+            }, 500);
+          }
           break;
         default:
           break;
@@ -80,6 +91,20 @@ class Server {
         client.send(`S${String.fromCharCode(this.cache.length)}`, () => {});
       }
     });
+  }
+  generateStaticNoiseStream() {
+    this.noStream = new Image(128, 64);
+    const update = () => {
+      for (let i = 2; i < this.noStream.buffer.length; i += 1) {
+        this.noStream.buffer[i] = Math.floor(Math.random() * 256);
+      }
+      this.ws.clients.forEach((client) => {
+        if (client.isUpdating || client.stream !== undefined) return;
+        client.send(this.noStream.buffer, () => {});
+      });
+      setTimeout(update, 50);
+    };
+    update();
   }
   getNewestFirmware(callback) {
     fs.readdir(firmwaresPath, (err, files) => {

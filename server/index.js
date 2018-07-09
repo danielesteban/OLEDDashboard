@@ -51,25 +51,10 @@ const server = new Server();
   update();
 }
 
-// Noisy frames
+// Gif player
 // Stream ID: 2
 {
   const stream = 2;
-  const image = new Image(128, 64);
-  const update = () => {
-    for (let i = 2; i < image.buffer.length; i += 1) {
-      image.buffer[i] = Math.floor(Math.random() * 256);
-    }
-    server.push(stream, image);
-    setTimeout(update, 60);
-  };
-  update();
-}
-
-// Gif player
-// Stream ID: 3
-{
-  const stream = 3;
   const GifPlayer = require('./gifplayer');
   const path = require('path');
   const player = new GifPlayer({
@@ -90,9 +75,9 @@ Google.auth((auth) => {
   const gmail = Google.gmail(auth);
 
   // New emails
-  // Stream ID: 4
+  // Stream ID: 3
   {
-    const stream = 4;
+    const stream = 3;
     const update = () => {
       gmail.users.messages.list({
         userId: 'me',
@@ -110,9 +95,9 @@ Google.auth((auth) => {
   }
 
   // Web users in last month (Count)
-  // Stream ID: 5
+  // Stream ID: 4
   {
-    const stream = 5;
+    const stream = 4;
     const request = {
       requestBody: {
         reportRequests: [{
@@ -144,9 +129,9 @@ Google.auth((auth) => {
   }
 
   // Web users in last month (Graph)
-  // Stream ID: 6
+  // Stream ID: 5
   {
-    const stream = 6;
+    const stream = 5;
     const request = {
       requestBody: {
         reportRequests: [{
