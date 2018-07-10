@@ -16,7 +16,7 @@ struct {
 } config = {
   "SERVER_HOST", 443, "/",
   "TLS_CERT_THUMBPRINT", true,
-  "0.0.1"
+  FIRMWARE_VERSION
 };
 
 // I/O config
@@ -26,6 +26,6 @@ struct {
 #define SECONDARY_BUTTON 3
 
 // Auto-pagination
-#define AUTOPAGINATION 20000
+#define AUTOPAGINATION 5000
 
 #endif // config_h

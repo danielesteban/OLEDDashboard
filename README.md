@@ -32,7 +32,7 @@ struct {
 } config = {
   "SERVER_HOST", 443, "/",
   "TLS_CERT_THUMBPRINT", true,
-  "FIRMWARE_VERSION"
+  FIRMWARE_VERSION
 };
 ```
 
