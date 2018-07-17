@@ -41,10 +41,11 @@ const server = new Server();
       url: `https://api.openweathermap.org/data/2.5/weather?id=${city}&units=${units}&appid=${key}`,
       json: true,
     }, (err, response, weather) => {
-      if (err || !weather) return;
-      server.push(stream, (
-        `${weather.main.temp}° - ${weather.main.humidity}%`
-      ));
+      if (!err && weather) {
+        server.push(stream, (
+          `${weather.main.temp}° - ${weather.main.humidity}%`
+        ));
+      }
       setTimeout(update, 60000);
     });
   };
@@ -83,11 +84,12 @@ Google.auth((auth) => {
         userId: 'me',
         q: 'in:inbox category:primary label:unread newer_than:7d',
       }, (err, res) => {
-        if (err) return;
-        const newEmails = res.data.resultSizeEstimate;
-        server.push(stream, (
-          `${newEmails > 0 ? newEmails : 'No'} Email${newEmails == 1 ? '' : 's'}`
-        ));
+        if (!err) {
+          const newEmails = res.data.resultSizeEstimate;
+          server.push(stream, (
+            `${newEmails > 0 ? newEmails : 'No'} Email${newEmails == 1 ? '' : 's'}`
+          ));
+        }
         setTimeout(update, 30000);
       });
     };
@@ -114,15 +116,16 @@ Google.auth((auth) => {
     };
     const update = () => {
       analytics.reports.batchGet(request, (err, res) => {
-        if (err) return;
-        const reports = res.data.reports;
-        if (reports.length) {
-          const users = reports[0].data.rows[0].metrics[0].values[0];
-          server.push(stream, (
-            `${users > 0 ? users : 'No'} User${users == 1 ? '' : 's'}`
-          ));
-          setTimeout(update, 60000);
+        if (!err) {
+          const reports = res.data.reports;
+          if (reports.length) {
+            const users = reports[0].data.rows[0].metrics[0].values[0];
+            server.push(stream, (
+              `${users > 0 ? users : 'No'} User${users == 1 ? '' : 's'}`
+            ));
+          }
         }
+        setTimeout(update, 60000);
       });
     };
     update();
@@ -169,38 +172,39 @@ Google.auth((auth) => {
     const update = () => {
       // Fetch the last 32 days user count
       analytics.reports.batchGet(request, (err, res) => {
-        if (err) return;
-        const reports = res.data.reports;
-        if (reports.length) {
-          let max = 0;
-          // Reformat the data
-          const hits = reports[0].data.rows
-            .map(({
-              dimensions: [date],
-              metrics: [{ values: [users] }]
-            }) => ({ date, users }))
-            .reduce((map, { date, users }) => {
-              map[date] = parseInt(users, 10);
-              max = Math.max(max, map[date]);
-              return map;
-            }, {});
-          max *= 1.1;
-          const ratio = 64 / max;
-          image.clear();
-          // Graph it out
-          for (let i = 0; i < 32; i += 1) {
-            const date = getDateFromToday(-31 + i);
-            const height = Math.floor((hits[date] || 0) * ratio);
-            for (let y = 0; y < height; y += 1) {
-              for (let x = ((i * 4) + 1) - 1; x < ((i * 4) + 3) - 1; x += 1) {
-                image.setPixel(x, 63 - y, true);
+        if (!err) {
+          const reports = res.data.reports;
+          if (reports.length) {
+            let max = 0;
+            // Reformat the data
+            const hits = reports[0].data.rows
+              .map(({
+                dimensions: [date],
+                metrics: [{ values: [users] }]
+              }) => ({ date, users }))
+              .reduce((map, { date, users }) => {
+                map[date] = parseInt(users, 10);
+                max = Math.max(max, map[date]);
+                return map;
+              }, {});
+            max *= 1.1;
+            const ratio = 64 / max;
+            image.clear();
+            // Graph it out
+            for (let i = 0; i < 32; i += 1) {
+              const date = getDateFromToday(-31 + i);
+              const height = Math.floor((hits[date] || 0) * ratio);
+              for (let y = 0; y < height; y += 1) {
+                for (let x = ((i * 4) + 1) - 1; x < ((i * 4) + 3) - 1; x += 1) {
+                  image.setPixel(x, 63 - y, true);
+                }
               }
             }
+            // Push the image to the clients
+            server.push(stream, image);
           }
-          // Push the image to the clients
-          server.push(stream, image);
-          setTimeout(update, 60000);
         }
+        setTimeout(update, 60000);
       });
     };
     update();
