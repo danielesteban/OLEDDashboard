@@ -99,7 +99,7 @@ void OLEDApp::setupNetwork() {
       WiFi.persistent(true);
       WiFi.mode(WIFI_STA);
       WiFi.setSleepMode(WIFI_NONE_SLEEP);
-      WiFi.setPhyMode(WIFI_PHY_MODE_11B);
+      WiFi.setPhyMode(WIFI_PHY_MODE_11N);
       WiFi.begin(ssid.c_str(), password.c_str());
       ESP.restart();
     } else {
@@ -158,4 +158,22 @@ void OLEDApp::progress(const uint8_t percent) {
   display.clear();
   display.drawProgressBar(0, 28, 120, 8, percent);
   display.display();
+}
+
+void OLEDApp::setBrightness(uint8_t brightness) {
+  uint8_t contrast = brightness;
+  if (brightness < 128) {
+    // Magic values to get a smooth/ step-free transition
+    contrast = brightness * 1.171;
+  } else {
+    contrast = brightness * 1.171 - 43;
+  }
+
+  uint8_t precharge = 241;
+  if (brightness == 0) {
+    precharge = 0;
+  }
+  uint8_t comdetect = brightness / 8;
+
+  display.setContrast(contrast, precharge, comdetect);
 }

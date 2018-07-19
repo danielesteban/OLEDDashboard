@@ -54,6 +54,9 @@ void onUpdate(const uint8_t percent) {
 
 void setup() {
   app.setup();
+  #ifdef BRIGHTNESS
+  app.setBrightness(BRIGHTNESS);
+  #endif
   client.setup(
     config.server, config.port, config.path, config.thumbprint, config.tls,
     config.version

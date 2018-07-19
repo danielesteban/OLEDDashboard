@@ -28,4 +28,7 @@ struct {
 // Auto-pagination
 #define AUTOPAGINATION 5000
 
+// Brightness
+#define BRIGHTNESS 127
+
 #endif // config_h

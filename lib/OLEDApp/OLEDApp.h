@@ -29,6 +29,7 @@ class OLEDApp {
     void drawImage(uint8_t width, uint8_t height, const uint8_t* image);
     void print(const char* text, const uint8_t* font = ArialMT_Plain_16);
     void progress(const uint8_t percent);
+    void setBrightness(uint8_t brightness);
     SH1106Brzo display;
   private:
     struct {
